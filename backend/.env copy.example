@@ -1,0 +1,22 @@
+# Server
+PORT=3000
+NODE_ENV=development
+
+# Database
+# DB_URL=mongodb+srv://<DB_USERNAME>:<DB_PASSWORD>@<CLUSTER_URL>/<DATABASE_NAME>
+DB_URL=mongodb+srv://sharmaji8991Dev Lavaniya_db_user:ND385GEp0hKBI3gU@ai-interview-cluster.oa4iyvu.mongodb.net/?appName=AI-Interview-Cluster
+
+# Inngest
+INNGEST_EVENT_KEY=PKQnnBCvs3LqnmIP0aq_RFMABBYsDfKYbwiIEhWo7s3CWpxoCmpUoyaqXQOpTS1T4pyIbHoG6PlI2JvV0BebKg
+INNGEST_SIGNING_KEY=signkey-prod-7b6b340df0d1c112d315806b22263f0a6fce7ad12bacd9c01034e44dc778df0a
+
+# Stream
+STREAM_API_KEY=8bq2xtd8ardh
+STREAM_API_SECRET=bd77yz43tchtbv6kkygphmt3khy7aaqsfm4qdq8dwx656bmt73crxvkwe3q2npky
+
+
+CLERK_PUBLISHABLE_KEY=pk_test_dmFsaWQtaGVkZ2Vob2ctNzIuY2xlcmsuYWNjb3VudHMuZGV2JA
+CLERK_SECRET_KEY=sk_test_e3r7lPj47fOdUH8BZmwUTzJ3l6LdO2CvlS0cjzpjvG
+
+# Client
+CLIENT_URL=http://localhost:5173
