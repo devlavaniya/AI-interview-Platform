@@ -1,15 +1,22 @@
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
+
 import path from "path";
 import cors from "cors";
-import { clerkMiddleware } from '@clerk/express'
-import {serve} from "inngest/express"
+
+import { clerkMiddleware } from "@clerk/express";
+import { serve } from "inngest/express";
 
 import { connectDB } from "./lib/db.js";
-import {inngest,functions} from "./lib/inngest.js"
-import {ENV} from "./lib/env.js";
-import chatRoutes from "./routes/chatRoutes.js"
+import {
+  inngest,
+  functions,
+} from "./lib/inngest.js";
+
+import { ENV } from "./lib/env.js";
+
+import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js";
 import youtubeRoutes from "./routes/youtubeRoutes.js";
@@ -19,9 +26,13 @@ import interviewRoutes from "./routes/interviewRoutes.js";
 import executeRoutes from "../routes/executeRoutes.js";
 
 const app = express();
+
 const __dirname = path.resolve();
 
-// middlewares
+// =========================================================
+// REQUEST LOGGER
+// =========================================================
+
 app.use((req, res, next) => {
   console.log(
     `[REQUEST] ${req.method} ${req.originalUrl}`
@@ -29,34 +40,103 @@ app.use((req, res, next) => {
 
   next();
 });
-app.use(express.json()); // express.json() is a built-in middleware in Express.js used to parse incoming HTTP request bodies that contain JSON data.
-app.use(cors({
-    origin: function (origin, callback) {
-        // allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        return callback(null, true); // Allow all origins for the local compiler to work from the deployed frontend
-    },
-    credentials: true
-}));
-// credentials: true means server allows a browser to include cookies on request
-// CORS middleware is used to control who can access your backend APIs from a different origin (different domain, port, or protocol).
-app.use("/api/inngest", serve({client:inngest, functions}))
-app.use(clerkMiddleware()); // this will adds auth field to request object: req.auth()
-app.use("/api/chat", chatRoutes); // For any request starting with /api/chat, hand it over to chatRoutes.
-app.use("/api/sessions", sessionRoutes);
-app.use("/api/problems", problemRoutes);
-app.use("/api/youtube", youtubeRoutes);
-app.use("/api/grok", grokRoutes);
-app.use("/api/codefolio", codefolioRoutes);
-app.use("/api/interview", interviewRoutes);
-app.use("/api/execute", executeRoutes);
 
-app.get("/msg", (req,res)=>{
-    res.status(200).json({
-        msg: "success from API123",
-        msg2 : "API"
-    })
-})
+// =========================================================
+// BODY PARSER
+// =========================================================
+
+app.use(express.json());
+
+// =========================================================
+// CORS
+// =========================================================
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
+
+// =========================================================
+// CLERK AUTHENTICATION
+// IMPORTANT: BEFORE PROTECTED ROUTES
+// =========================================================
+
+app.use(
+  clerkMiddleware({
+    authorizedParties: [
+      process.env.FRONTEND_URL,
+    ],
+  })
+);
+
+// =========================================================
+// INNGEST
+// =========================================================
+
+app.use(
+  "/api/inngest",
+  serve({
+    client: inngest,
+    functions,
+  })
+);
+
+// =========================================================
+// ROUTES
+// =========================================================
+
+app.use(
+  "/api/chat",
+  chatRoutes
+);
+
+app.use(
+  "/api/sessions",
+  sessionRoutes
+);
+
+app.use(
+  "/api/problems",
+  problemRoutes
+);
+
+app.use(
+  "/api/youtube",
+  youtubeRoutes
+);
+
+app.use(
+  "/api/grok",
+  grokRoutes
+);
+
+app.use(
+  "/api/codefolio",
+  codefolioRoutes
+);
+
+app.use(
+  "/api/interview",
+  interviewRoutes
+);
+
+app.use(
+  "/api/execute",
+  executeRoutes
+);
+
+// =========================================================
+// TEST API
+// =========================================================
+
+app.get("/msg", (req, res) => {
+  res.status(200).json({
+    msg: "success from API123",
+    msg2: "API",
+  });
+});
 
 app.get("/api/test", (req, res) => {
   res.json({
@@ -66,24 +146,52 @@ app.get("/api/test", (req, res) => {
   });
 });
 
-if(ENV.NODE_ENV === "production"){
-    app.use(express.static(path.join(__dirname,"../frontend/dist")))  // making dist as static assets
+// =========================================================
+// PRODUCTION FRONTEND
+// =========================================================
 
-    app.get("/{*any}", (req,res)=>{
-        res.sendFile( path.join(__dirname,"../frontend/dist/index.html"));
-    })
+if (ENV.NODE_ENV === "production") {
+  app.use(
+    express.static(
+      path.join(
+        __dirname,
+        "../frontend/dist"
+      )
+    )
+  );
+
+  app.get("/{*any}", (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        "../frontend/dist/index.html"
+      )
+    );
+  });
 }
 
-const startServer = async () =>{
-    try{
-        await connectDB();
-        app.listen(ENV.PORT, ()=>{
-            console.log(`Server is running on port ${ENV.PORT}`);
-        });
-    }
-    catch(error){
-        console.log("error starting the server", error);
-    }
-}
+// =========================================================
+// START SERVER
+// =========================================================
+
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    app.listen(
+      ENV.PORT,
+      () => {
+        console.log(
+          `Server is running on port ${ENV.PORT}`
+        );
+      }
+    );
+  } catch (error) {
+    console.log(
+      "error starting the server",
+      error
+    );
+  }
+};
 
 startServer();
