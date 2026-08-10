@@ -1,3 +1,11 @@
+// import axios from "axios";
+
+// const axiosInstance = axios.create({
+//   baseURL: import.meta.env.VITE_API_URL,
+//   withCredentials: true, // by adding this field browser will send the cookies to server automatically, on every single req
+// });
+
+// export default axiosInstance;
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -11,65 +19,61 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
+// --------------------------------------------------
 // Clerk token getter
-let getClerkToken = null;
+// This will be connected from main.jsx
+// --------------------------------------------------
+let clerkGetToken = null;
 
-export const setClerkTokenGetter = (getter) => {
-  getClerkToken = getter;
+export const setClerkGetToken = (getToken) => {
+  clerkGetToken = getToken;
 };
 
-// ================================
-// REQUEST INTERCEPTOR
-// ================================
-
+// --------------------------------------------------
+// Request interceptor
+// Attach Clerk session token to every API request
+// --------------------------------------------------
 axiosInstance.interceptors.request.use(
   async (config) => {
-    console.log("========== API REQUEST ==========");
-    console.log("Method:", config.method?.toUpperCase());
-    console.log("Base URL:", config.baseURL);
-    console.log("URL:", config.url);
-
-    console.log(
-      "FINAL URL:",
-      `${config.baseURL}${config.url}`
-    );
-
-    // Get Clerk session token
-    if (getClerkToken) {
-      try {
-        const token = await getClerkToken();
+    try {
+      if (clerkGetToken) {
+        const token = await clerkGetToken();
 
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
 
-          console.log("Clerk token attached: YES");
+          console.log("🔐 Clerk token attached to request");
         } else {
-          console.warn("Clerk token attached: NO TOKEN");
+          console.warn("⚠️ Clerk token is empty");
         }
-      } catch (error) {
-        console.error(
-          "Failed to get Clerk token:",
-          error
-        );
+      } else {
+        console.warn("⚠️ Clerk getToken is not initialized yet");
       }
-    } else {
-      console.warn(
-        "Clerk token getter has not been initialized"
-      );
+    } catch (error) {
+      console.error("❌ Failed to get Clerk token:", error);
     }
 
+    // Existing request logging
+    console.log("========== API REQUEST ==========");
+    console.log("Method:", config.method?.toUpperCase());
+    console.log("Base URL:", config.baseURL);
+    console.log("URL:", config.url);
+    console.log("FINAL URL:", `${config.baseURL}${config.url}`);
     console.log("Data:", config.data);
+    console.log(
+      "Authorization:",
+      config.headers?.Authorization ? "Bearer token attached" : "Missing",
+    );
     console.log("================================");
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
-// ================================
-// RESPONSE INTERCEPTOR
-// ================================
-
+// --------------------------------------------------
+// Response interceptor
+// --------------------------------------------------
 axiosInstance.interceptors.response.use(
   (response) => {
     console.log("========== API RESPONSE ==========");
@@ -85,17 +89,11 @@ axiosInstance.interceptors.response.use(
     console.error("Status:", error.response?.status);
     console.error("URL:", error.config?.url);
     console.error("Base URL:", error.config?.baseURL);
-
     console.error(
       "FINAL URL:",
       `${error.config?.baseURL}${error.config?.url}`
     );
-
-    console.error(
-      "Response:",
-      error.response?.data
-    );
-
+    console.error("Response:", error.response?.data);
     console.error("================================");
 
     return Promise.reject(error);

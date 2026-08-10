@@ -1,15 +1,5 @@
-import { useEffect } from "react";
-
-import {
-  useUser,
-  useAuth,
-} from "@clerk/clerk-react";
-
-import {
-  Navigate,
-  Route,
-  Routes,
-} from "react-router";
+import { useUser } from "@clerk/clerk-react";
+import { Navigate, Route, Routes } from "react-router";
 
 import { Toaster } from "react-hot-toast";
 
@@ -27,143 +17,66 @@ import CodeFolioPage from "./pages/CodeFolioPage";
 import MockInterviewPage from "./pages/MockInterviewPage";
 import SessionPage from "./pages/SessionPage";
 
-// Axios / Clerk token connection
-import { setClerkTokenGetter } from "./lib/axios";
+// Add these pages if they exist
+// import SessionsPage from "./pages/SessionPage";
+// import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   const { isLoaded, isSignedIn } = useUser();
 
-  // Get Clerk session token function
-  const { getToken } = useAuth();
-
-  // =========================================================
-  // CONNECT CLERK WITH AXIOS
-  // =========================================================
-
-  useEffect(() => {
-    setClerkTokenGetter(getToken);
-  }, [getToken]);
-
   // Prevent flickering while Clerk initializes
-  if (!isLoaded) {
-    return null;
-  }
+  if (!isLoaded) return null;
 
   return (
     <>
       <Routes>
-
         {/* ================= PUBLIC ROUTES ================= */}
 
         <Route
           path="/"
           element={
-            !isSignedIn ? (
-              <HomePage />
-            ) : (
-              <Navigate
-                to="/dashboard"
-                replace
-              />
-            )
+            !isSignedIn ? <HomePage /> : <Navigate to="/dashboard" replace />
           }
         />
 
         {/* ================= PROTECTED ROUTES ================= */}
 
         <Route
-          element={
-            isSignedIn ? (
-              <AppLayout />
-            ) : (
-              <Navigate
-                to="/"
-                replace
-              />
-            )
-          }
+          element={isSignedIn ? <AppLayout /> : <Navigate to="/" replace />}
         >
-          <Route
-            path="/dashboard"
-            element={<DashboardPage />}
-          />
+          <Route path="/dashboard" element={<DashboardPage />} />
 
-          <Route
-            path="/problems"
-            element={<ProblemsPage />}
-          />
+          <Route path="/problems" element={<ProblemsPage />} />
 
-          <Route
-            path="/problem/:id"
-            element={<ProblemPage />}
-          />
+          <Route path="/problem/:id" element={<ProblemPage />} />
 
-          <Route
-            path="/add-problem"
-            element={<AddProblem />}
-          />
+          <Route path="/add-problem" element={<AddProblem />} />
 
-          <Route
-            path="/contests"
-            element={<ContestsPage />}
-          />
+          <Route path="/contests" element={<ContestsPage />} />
 
-          <Route
-            path="/resources"
-            element={<ResourcesPage />}
-          />
+          <Route path="/resources" element={<ResourcesPage />} />
 
-          <Route
-            path="/codefolio"
-            element={<CodeFolioPage />}
-          />
+          <Route path="/codefolio" element={<CodeFolioPage />} />
 
-          <Route
-            path="/mock-interview"
-            element={<MockInterviewPage />}
-          />
+          <Route path="/mock-interview" element={<MockInterviewPage />} />
 
           {/* Sessions list */}
-          <Route
-            path="/sessions"
-            element={<SessionPage />}
-          />
+          <Route path="/sessions" element={<SessionPage />} />
 
           {/* Settings */}
-          {/* <Route
-            path="/settings"
-            element={<SettingsPage />}
-          /> */}
+          {/* <Route path="/settings" element={<SettingsPage />} /> */}
         </Route>
 
         {/* ================= FULL SCREEN SESSION ================= */}
 
         <Route
           path="/session/:id"
-          element={
-            isSignedIn ? (
-              <SessionPage />
-            ) : (
-              <Navigate
-                to="/"
-                replace
-              />
-            )
-          }
+          element={isSignedIn ? <SessionPage /> : <Navigate to="/" replace />}
         />
 
         {/* ================= 404 ================= */}
 
-        <Route
-          path="*"
-          element={
-            <Navigate
-              to="/"
-              replace
-            />
-          }
-        />
-
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       {/* ================= TOAST ================= */}

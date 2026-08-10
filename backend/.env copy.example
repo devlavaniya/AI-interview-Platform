@@ -4,7 +4,7 @@ NODE_ENV=development
 
 # Database
 # DB_URL=mongodb+srv://<DB_USERNAME>:<DB_PASSWORD>@<CLUSTER_URL>/<DATABASE_NAME>
-DB_URL=mongodb+srv://sharmaji8991Dev Lavaniya_db_user:ND385GEp0hKBI3gU@ai-interview-cluster.oa4iyvu.mongodb.net/?appName=AI-Interview-Cluster
+DB_URL=mongodb+srv://sharmaji8991mayank_db_user:ND385GEp0hKBI3gU@ai-interview-cluster.oa4iyvu.mongodb.net/?appName=AI-Interview-Cluster
 
 # Inngest
 INNGEST_EVENT_KEY=PKQnnBCvs3LqnmIP0aq_RFMABBYsDfKYbwiIEhWo7s3CWpxoCmpUoyaqXQOpTS1T4pyIbHoG6PlI2JvV0BebKg

@@ -458,10 +458,222 @@ function FeatureCard({ feature }) {
 }
 
 /* =========================================================
+   CODE SYNTAX HIGHLIGHTING
+========================================================= */
+
+const CODE_COLORS = {
+  keyword: "text-[#c586c0]",
+  type: "text-[#4ec9b0]",
+  function: "text-[#dcdcaa]",
+  string: "text-[#ce9178]",
+  number: "text-[#b5cea8]",
+  comment: "text-[#6a9955]",
+  variable: "text-[#9cdcfe]",
+  operator: "text-[#d4d4d4]",
+  punctuation: "text-[#d4d4d4]",
+  plain: "text-[#d4d4d4]",
+};
+
+function highlightCodeLine(line, language) {
+  const patterns = {
+    python: {
+      keyword: /^(def|class|return|if|else|elif|for|while|in|is|and|or|not|import|from|as|True|False|None|try|except|finally|with|lambda|yield|pass|break|continue)\b/,
+      type: /^(int|float|str|list|dict|set|tuple|bool|None)\b/,
+    },
+    java: {
+      keyword: /^(public|private|protected|static|final|class|interface|extends|implements|new|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|throws|this|super|void|package|import)\b/,
+      type: /^(int|long|double|float|boolean|char|byte|short|String|Integer|Long|Double|Boolean|List|Map|HashMap|ArrayList)\b/,
+    },
+    cpp: {
+      keyword: /^(include|using|namespace|return|if|else|for|while|do|switch|case|break|continue|class|struct|public|private|protected|const|auto|new|delete|template|typename|static|void)\b/,
+      type: /^(int|long|double|float|bool|char|string|vector|unordered_map|size_t)\b/,
+    },
+  };
+
+  const config = patterns[language] || patterns.python;
+  const tokens = [];
+  let remaining = line;
+  let tokenIndex = 0;
+
+  while (remaining.length > 0) {
+    let match;
+
+    // Comments
+    if (language === "python") {
+      match = remaining.match(/^#.*$/);
+    } else {
+      match = remaining.match(/^\/\/.*$/);
+    }
+
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.comment}>
+          {match[0]}
+        </span>
+      );
+      break;
+    }
+
+    // Strings
+    match = remaining.match(/^("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`)/);
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.string}>
+          {match[0]}
+        </span>
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Numbers
+    match = remaining.match(/^\b\d+(?:\.\d+)?\b/);
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.number}>
+          {match[0]}
+        </span>
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Keywords
+    match = remaining.match(config.keyword);
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.keyword}>
+          {match[0]}
+        </span>
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Types / built-ins
+    match = remaining.match(config.type);
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.type}>
+          {match[0]}
+        </span>
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Function names: identifier followed by (
+    match = remaining.match(/^([A-Za-z_][A-Za-z0-9_]*)(?=\s*\()/);
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.function}>
+          {match[0]}
+        </span>
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Operators / punctuation
+    match = remaining.match(/^(===|!==|==|!=|<=|>=|=>|&&|\|\||\+\+|--|[+\-*/%=<>!&|?:])/);
+    if (match) {
+      tokens.push(
+        <span key={tokenIndex++} className={CODE_COLORS.operator}>
+          {match[0]}
+        </span>
+      );
+      remaining = remaining.slice(match[0].length);
+      continue;
+    }
+
+    // Single character fallback.
+    tokens.push(
+      <span key={tokenIndex++} className={CODE_COLORS.plain}>
+        {remaining[0]}
+      </span>
+    );
+    remaining = remaining.slice(1);
+  }
+
+  return tokens;
+}
+
+function SyntaxHighlightedCode({ code, language }) {
+  return (
+    <>
+      {code.split("\\n").map((line, index) => (
+        <div key={index} className="h-5">
+          {highlightCodeLine(line, language)}
+        </div>
+      ))}
+    </>
+  );
+}
+
+/* =========================================================
    HOME PAGE
 ========================================================= */
 
 function HomePage() {
+  const [selectedLanguage, setSelectedLanguage] = useState("python");
+
+  const codeSamples = {
+    python: `def two_sum(nums, target):
+    seen = {}
+
+    for i, num in enumerate(nums):
+        complement = target - num
+
+        if complement in seen:
+            return [seen[complement], i]
+
+        seen[num] = i
+
+    return []`,
+
+    java: `class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> seen = new HashMap<>();
+
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+
+            if (seen.containsKey(complement)) {
+                return new int[] {
+                    seen.get(complement),
+                    i
+                };
+            }
+
+            seen.put(nums[i], i);
+        }
+
+        return new int[] {};
+    }
+}`,
+
+    cpp: `#include <iostream>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+vector<int> twoSum(vector<int>& nums, int target) {
+    unordered_map<int, int> seen;
+
+    for (int i = 0; i < nums.size(); i++) {
+        int complement = target - nums[i];
+
+        if (seen.count(complement)) {
+            return {seen[complement], i};
+        }
+
+        seen[nums[i]] = i;
+    }
+
+    return {};
+}`,
+  };
+
   const features = [
     {
       number: "01",
@@ -1004,7 +1216,7 @@ function HomePage() {
                       py-4
                     "
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <span
                           className="
@@ -1031,107 +1243,134 @@ function HomePage() {
                         </span>
                       </div>
 
-                      <span
-                        className="
-                          rounded-lg
-                          bg-emerald-400/10
-                          px-2
-                          py-1
-                          text-[9px]
-                          font-medium
-                          text-emerald-400
-                        "
-                      >
-                        LIVE
-                      </span>
+                      <div className="flex items-center gap-3">
+                        {/* Language tabs */}
+                        <div className="flex items-center gap-1 rounded-lg border border-[#303030] bg-[#1e1e1e] p-1">
+                          {[
+                            { id: "cpp", label: "C++" },
+                            { id: "java", label: "Java" },
+                            { id: "python", label: "Python" },
+                          ].map((language) => (
+                            <button
+                              key={language.id}
+                              type="button"
+                              onClick={() => setSelectedLanguage(language.id)}
+                              className={`
+                                rounded-md
+                                px-3
+                                py-1.5
+                                text-[9px]
+                                font-semibold
+                                transition-all
+                                duration-200
+                                ${
+                                  selectedLanguage === language.id
+                                    ? "bg-[#2d2d2d] text-white shadow-none ring-1 ring-[#3e3e3e]"
+                                    : "text-[#858585] hover:bg-[#2a2a2a] hover:text-[#d4d4d4]"
+                                }
+                              `}
+                            >
+                              {language.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        <span
+                          className="
+                            rounded-lg
+                            bg-emerald-400/10
+                            px-2
+                            py-1
+                            text-[9px]
+                            font-medium
+                            text-emerald-400
+                          "
+                        >
+                          LIVE
+                        </span>
+                      </div>
                     </div>
                   </div>
-
                   {/* Editor */}
 
-                  <div
-                    className="
-                      grid
-                      grid-cols-[44px_1fr]
-                      bg-[#0c0c0c]
-                    "
-                  >
-                    <div
-                      className="
-                        border-r
-                        border-zinc-800
-                        py-4
-                        text-center
-                        font-mono
-                        text-[10px]
-                        leading-5
-                        text-zinc-700
-                      "
-                    >
-                      1
-                      <br />
-                      2
-                      <br />
-                      3
-                      <br />
-                      4
-                      <br />
-                      5
-                      <br />
-                      6
-                      <br />
-                      7
-                      <br />8
+                  <div className="bg-[#1e1e1e]">
+                    <div className="grid grid-cols-[44px_minmax(0,1fr)]">
+                      {/* Line numbers */}
+                      <div
+                        className="
+                          select-none
+                          border-r
+                          border-zinc-800
+                          bg-[#181818]
+                          px-3
+                          py-4
+                          text-right
+                          font-mono
+                          text-[10px]
+                          leading-5
+                          text-zinc-700
+                        "
+                      >
+                        {codeSamples[selectedLanguage]
+                          .split("\n")
+                          .map((_, index) => (
+                            <div key={index} className="h-5">
+                              {index + 1}
+                            </div>
+                          ))}
+                      </div>
+
+                      {/* Properly indented code */}
+                      <div className="min-w-0 overflow-x-auto">
+                        <pre
+                          className="
+                            m-0
+                            min-h-[190px]
+                            whitespace-pre
+                            px-5
+                            py-4
+                            font-mono
+                            text-[10px]
+                            leading-5
+                            sm:text-[11px]
+                          "
+                        >
+                          <code>
+                            <SyntaxHighlightedCode
+                              code={codeSamples[selectedLanguage]}
+                              language={selectedLanguage}
+                            />
+                          </code>
+                        </pre>
+                      </div>
                     </div>
 
+                    {/* Editor footer */}
                     <div
                       className="
-                        overflow-hidden
-                        p-4
-                        font-mono
-                        text-[11px]
-                        leading-5
-                        sm:text-xs
+                        flex
+                        items-center
+                        justify-between
+                        border-t
+                        border-zinc-800
+                        bg-[#181818]
+                        px-4
+                        py-2
                       "
                     >
-                      <span className="text-purple-400">def</span>{" "}
-                      <span className="text-blue-300">two_sum</span>
-                      <span className="text-zinc-400">(nums, target):</span>
-                      <br />
-                      <span className="text-zinc-500">
-                        {"    "}seen = {"{}"}
+                      <span className="text-[9px] text-zinc-700">
+                        {selectedLanguage === "cpp"
+                          ? "C++"
+                          : selectedLanguage === "java"
+                            ? "Java"
+                            : "Python"}{" "}
+                        • Read only
                       </span>
-                      <br />
-                      <span className="text-purple-400">{"    "}for</span>{" "}
-                      <span className="text-zinc-300">i, num</span>{" "}
-                      <span className="text-purple-400">in</span>{" "}
-                      <span className="text-zinc-300">enumerate(nums):</span>
-                      <br />
-                      <span className="text-zinc-500">
-                        {"        "}
-                        complement = target - num
+
+                      <span className="flex items-center gap-1.5 text-[9px] text-zinc-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-yellow-400/70" />
+                        Syntax ready
                       </span>
-                      <br />
-                      <span className="text-purple-400">
-                        {"        "}if
-                      </span>{" "}
-                      <span className="text-yellow-300">complement</span>{" "}
-                      <span className="text-zinc-400">in seen:</span>
-                      <br />
-                      <span className="text-zinc-500">
-                        {"            "}
-                        return [seen[complement], i]
-                      </span>
-                      <br />
-                      <span className="text-zinc-500">
-                        {"        "}
-                        seen[num] = i
-                      </span>
-                      <br />
-                      <span className="text-purple-400">
-                        {"    "}return
-                      </span>{" "}
-                      <span className="text-zinc-500">[]</span>
                     </div>
                   </div>
 
@@ -1924,7 +2163,7 @@ function HomePage() {
                   confidence.
                 </p>
 
-                {/* Dev */}
+                {/* MAYANK */}
 
                 <div
                   className="
@@ -1936,7 +2175,7 @@ function HomePage() {
                 >
                   <img
                     src="/profile.png"
-                    alt="Dev Lavaniya"
+                    alt="Mayank"
                     className="
                       h-10
                       w-10
@@ -1956,7 +2195,7 @@ function HomePage() {
                         text-zinc-400
                       "
                     >
-                      Dev Lavaniya
+                      Mayank Sharma
                     </span>
 
                     <span
@@ -2055,7 +2294,7 @@ function HomePage() {
 
                   <div className="mt-4 flex gap-2">
                     <a
-                      href="https://github.com/devlavaniya"
+                      href="https://github.com/Mayank12Sharma"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="GitHub"
@@ -2079,7 +2318,7 @@ function HomePage() {
                     </a>
 
                     <a
-                      href="https://www.linkedin.com/in/dev-lavaniya/"
+                      href="https://www.linkedin.com/in/mayanksharmams/"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="LinkedIn"
@@ -2139,7 +2378,7 @@ function HomePage() {
                   text-zinc-400
                 "
               >
-                Built by Dev Lavaniya
+                Built by Mayank
               </span>
             </div>
           </div>

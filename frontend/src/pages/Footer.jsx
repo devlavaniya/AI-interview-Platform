@@ -6,17 +6,17 @@ const socials = [
   {
     Icon: FaLinkedin,
     label: "LinkedIn",
-    href: "https://www.linkedin.com/in/dev-lavaniya/",
+    href: "https://www.linkedin.com/in/mayanksharmams/",
   },
   {
     Icon: FaGithub,
     label: "GitHub",
-    href: "https://github.com/devlavaniya",
+    href: "https://github.com/Mayank12Sharma",
   },
   {
     Icon: SiGmail,
     label: "Gmail",
-    href: "mailto:devlavaniya18@gmail.com",
+    href: "mailto:sharmaji123mayank@gmail.com",
   },
 ];
 
@@ -30,7 +30,7 @@ export default function Footer() {
           <div className="flex items-center gap-5">
             <img
               src="/profile.png"
-              alt="Dev Lavaniya"
+              alt="Mayank Sharma"
               className="h-16 w-16 rounded-full border-2 border-yellow-400 object-cover"
             />
 
@@ -46,7 +46,7 @@ export default function Footer() {
               </p>
 
               <p className="mt-1 text-sm text-zinc-500">
-                Designed & Developed by Dev Lavaniya
+                Designed & Developed by Mayank Sharma
               </p>
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function Footer() {
             Built with
             <Heart className="h-4 w-4 fill-red-500 text-red-500" />
             by
-            <span className="font-semibold text-yellow-400">Dev Lavaniya</span>
+            <span className="font-semibold text-yellow-400">Mayank Sharma</span>
           </p>
         </div>
       </div>
