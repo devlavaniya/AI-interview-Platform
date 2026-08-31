@@ -2163,7 +2163,7 @@ vector<int> twoSum(vector<int>& nums, int target) {
                   confidence.
                 </p>
 
-                {/* MAYANK */}
+                {/* DEV */}
 
                 <div
                   className="
@@ -2195,7 +2195,7 @@ vector<int> twoSum(vector<int>& nums, int target) {
                         text-zinc-400
                       "
                     >
-                      Mayank Sharma
+                      Dev Lavaniya
                     </span>
 
                     <span
@@ -2294,7 +2294,7 @@ vector<int> twoSum(vector<int>& nums, int target) {
 
                   <div className="mt-4 flex gap-2">
                     <a
-                      href="https://github.com/Mayank12Sharma"
+                      href="https://github.com/devlavaniya"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="GitHub"
@@ -2318,7 +2318,7 @@ vector<int> twoSum(vector<int>& nums, int target) {
                     </a>
 
                     <a
-                      href="https://www.linkedin.com/in/mayanksharmams/"
+                      href="https://www.linkedin.com/in/dev-lavaniya/"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="LinkedIn"
@@ -2378,7 +2378,7 @@ vector<int> twoSum(vector<int>& nums, int target) {
                   text-zinc-400
                 "
               >
-                Built by Mayank
+                Built by Dev
               </span>
             </div>
           </div>
